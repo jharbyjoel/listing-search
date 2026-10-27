@@ -36,7 +36,10 @@ function cityErrors(listings, values) {
 
 export async function handler(event) {
   try {
-    const query = event.queryStringParameters || {};
+    let query = event.queryStringParameters;
+    if (query === null || query === undefined) {
+      query = {};
+    }
     const validation = validateQuery(query);
     const listings = loadListings();
     const errors = [...validation.errors, ...cityErrors(listings, validation.values)];
