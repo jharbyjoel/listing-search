@@ -1,0 +1,50 @@
+# SAM template for the listing search API.
+#
+# - ValidationLayer: the shared validation rules, mounted in Lambda at /opt/nodejs/.
+#   The handler imports it as /opt/nodejs/validateQuery.js, so esbuild must not bundle it.
+# - ListingsFunction: bundles src/handler.js with esbuild into one ES module file.
+#   '/opt/nodejs/*' is marked external so esbuild leaves that import alone.
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Listing search API (local via sam local start-api)
+
+Resources:
+  ValidationLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: listing-search-validation
+      ContentUri: layers/validation
+      CompatibleRuntimes:
+        - nodejs22.x
+
+  ListingsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Target: es2022
+        EntryPoints:
+          - src/handler.js
+        External:
+          - /opt/nodejs/*
+        OutExtension:
+          - .js=.mjs
+    Properties:
+      CodeUri: ./
+      Runtime: nodejs22.x
+      Handler: handler.handler
+      Timeout: 10
+      Layers:
+        - !Ref ValidationLayer
+      Events:
+        ListListings:
+          Type: Api
+          Properties:
+            Path: /listings
+            Method: get
+
+Outputs:
+  ApiUrl:
+    Description: Base URL of the listings API
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/listings'
