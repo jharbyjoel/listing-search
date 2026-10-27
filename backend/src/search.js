@@ -1,3 +1,5 @@
+import { scoreListing } from './scoring.js';
+
 // Filters never change the listings they receive. Each filter is skipped
 // when its value is undefined.
 
@@ -104,4 +106,25 @@ function compareScoredListings(first, second) {
 // Returns a new sorted array. The input array is not changed.
 export function sortScoredListings(scoredListings) {
   return [...scoredListings].sort(compareScoredListings);
+}
+
+// Returns one page of already-sorted listings, plus totals for the whole list.
+// A page past the end gives an empty `results` array.
+export function paginate(sortedListings, page, pageSize) {
+  const totalResults = sortedListings.length;
+  const totalPages = Math.ceil(totalResults / pageSize);
+  const start = (page - 1) * pageSize;
+  const results = sortedListings.slice(start, start + pageSize);
+  return { results, page, pageSize, totalResults, totalPages };
+}
+
+// Steps: filter, score, sort, paginate. The `now` default is the real current time.
+export function searchListings(listings, values, now = new Date()) {
+  const matching = filterListings(listings, values);
+  const scored = [];
+  for (const listing of matching) {
+    scored.push({ ...listing, score: scoreListing(listing, values.targetBudget, now) });
+  }
+  const sorted = sortScoredListings(scored);
+  return paginate(sorted, values.page, values.pageSize);
 }
