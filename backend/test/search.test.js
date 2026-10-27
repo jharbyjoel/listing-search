@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { filterListings, sortScoredListings } from '../src/search.js';
+import { filterListings, sortScoredListings, paginate, searchListings } from '../src/search.js';
+import { loadListings } from '../src/loadListings.js';
 
 function makeListing(overrides) {
   return {
@@ -126,5 +127,95 @@ describe('sortScoredListings', () => {
     const result = sortScoredListings(input);
     expect(result).not.toBe(input);
     expect(input).toEqual(before);
+  });
+});
+
+describe('paginate', () => {
+  const FIVE_LISTINGS = [
+    makeListing({ id: '1' }),
+    makeListing({ id: '2' }),
+    makeListing({ id: '3' }),
+    makeListing({ id: '4' }),
+    makeListing({ id: '5' }),
+  ];
+
+  it('returns the first page with totals', () => {
+    const result = paginate(FIVE_LISTINGS, 1, 2);
+    expect(idsOf(result.results)).toEqual(['1', '2']);
+    expect(result).toMatchObject({ page: 1, pageSize: 2, totalResults: 5, totalPages: 3 });
+  });
+
+  it('returns only the remaining items on the last partial page', () => {
+    const result = paginate(FIVE_LISTINGS, 3, 2);
+    expect(idsOf(result.results)).toEqual(['5']);
+    expect(result).toMatchObject({ totalResults: 5, totalPages: 3 });
+  });
+
+  it('returns empty results with correct totals for a page past the end', () => {
+    const result = paginate(FIVE_LISTINGS, 10, 2);
+    expect(result.results).toEqual([]);
+    expect(result).toMatchObject({ page: 10, totalResults: 5, totalPages: 3 });
+  });
+
+  it('returns all items on one page when pageSize is larger than the total', () => {
+    const result = paginate(FIVE_LISTINGS, 1, 50);
+    expect(idsOf(result.results)).toEqual(['1', '2', '3', '4', '5']);
+    expect(result).toMatchObject({ totalResults: 5, totalPages: 1 });
+  });
+
+  it('returns zero totals when there are no items', () => {
+    const result = paginate([], 1, 10);
+    expect(result).toMatchObject({ results: [], totalResults: 0, totalPages: 0 });
+  });
+});
+
+describe('searchListings', () => {
+  const NOW = new Date('2026-10-27T00:00:00Z');
+
+  // Defaults match the API defaults (page 1, pageSize 10). Override as needed.
+  function searchValues(overrides) {
+    return { page: 1, pageSize: 10, ...overrides };
+  }
+
+  it('returns all 12 sample listings with no filters, scored 0 to 1 and sorted by score descending', () => {
+    const result = searchListings(loadListings(), searchValues({ pageSize: 50 }), NOW);
+    expect(result.totalResults).toBe(12);
+    for (const listing of result.results) {
+      expect(listing.score).toBeGreaterThanOrEqual(0);
+      expect(listing.score).toBeLessThanOrEqual(1);
+    }
+    for (let index = 1; index < result.results.length; index++) {
+      expect(result.results[index - 1].score).toBeGreaterThanOrEqual(result.results[index].score);
+    }
+  });
+
+  it('returns only Reston listings for the city filter', () => {
+    const result = searchListings(loadListings(), searchValues({ city: 'reston' }), NOW);
+    expect(result.totalResults).toBeGreaterThan(0);
+    for (const listing of result.results) {
+      expect(listing.city).toBe('Reston');
+    }
+  });
+
+  it('returns empty results and zero totals when no listing matches', () => {
+    const result = searchListings(loadListings(), searchValues({ minPrice: 9000000 }), NOW);
+    expect(result).toMatchObject({ results: [], totalResults: 0, totalPages: 0 });
+  });
+
+  // A1 is priced exactly at the 450000 target and listed 59 days before NOW.
+  // A4 is priced 610000 (far over budget) and listed 54 days before NOW.
+  // A1 ranks higher because budget closeness is worth 60% of the score.
+  it('ranks the listing at the target budget (A1) above a recent listing far over it (A4)', () => {
+    const result = searchListings(loadListings(), searchValues({ targetBudget: 450000, pageSize: 50 }), NOW);
+    const ids = idsOf(result.results);
+    expect(ids.indexOf('A1')).toBeLessThan(ids.indexOf('A4'));
+  });
+
+  it('does not add a score to the original listings', () => {
+    const listings = loadListings();
+    searchListings(listings, searchValues({ targetBudget: 450000 }), NOW);
+    for (const listing of listings) {
+      expect(listing).not.toHaveProperty('score');
+    }
   });
 });
