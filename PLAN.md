@@ -119,7 +119,7 @@ Rules:
 - Loading state, no-results state, error display, pagination controls
 
 ## README contents
-Setup/run steps (SAM local + Vite), API reference, scoring formula and rationale, trade-offs (JS backend, no DB, duplicates not merged, server-side validation shared with client), and possible extensions (dedup, status filter, configurable weights, DynamoDB/real feed behind the loader).
+Setup/run steps (SAM local + Vite), API reference, scoring formula and rationale, trade-offs (JS backend, no DB, duplicates not merged, validation duplicated in a Lambda layer and a frontend utility), and possible extensions (dedup, status filter, configurable weights, DynamoDB/real feed behind the loader).
 
 ## PR breakdown (build order)
 
