@@ -39,7 +39,7 @@ Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is th
   - Breaking change (`!`) → MAJOR (`0.4.2` → `1.0.0`)
   - `feat:` → MINOR (`0.4.2` → `0.5.0`)
   - `fix:`, `docs:`, `chore:`, `test:` → PATCH (`0.4.2` → `0.4.3`)
-- The bump is one commit directly on `main` titled `chore: release vX.Y.Z`, followed by a git tag `vX.Y.Z` pushed to GitHub.
+- The bump is one commit directly on `main` titled `chore: release vX.Y.Z`, followed by a GitHub Release named `vX.Y.Z` (which creates the tag), e.g. `gh release create vX.Y.Z --title "vX.Y.Z" --notes "- feat: <PR title> (#N)"`. Release notes list the merged PR title(s) only.
 
 ### 6. Before opening a PR
 - Run the tests for the project you changed (`npm test` in `backend/` or `frontend/`) and make sure they pass.
