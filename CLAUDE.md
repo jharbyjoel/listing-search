@@ -32,7 +32,16 @@ Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is th
 - Use `.github/pull_request_template.md` for every PR. Do not add or remove sections.
 - Keep it short: the core idea only. No long lists of every file changed.
 
-### 5. Before opening a PR
+### 5. Versioning
+- The project version lives in the root `VERSION` file (semantic versioning, `MAJOR.MINOR.PATCH`). It covers the whole repo, backend and frontend together.
+- Every PR title starts with its type: `feat:`, `fix:`, `docs:`, `chore:`, or `test:`. Add `!` after the type for a breaking change (e.g. `feat!: ...`).
+- The **manager** bumps the version manually after each PR merge. Sub agents never edit `VERSION`.
+  - Breaking change (`!`) → MAJOR (`0.4.2` → `1.0.0`)
+  - `feat:` → MINOR (`0.4.2` → `0.5.0`)
+  - `fix:`, `docs:`, `chore:`, `test:` → PATCH (`0.4.2` → `0.4.3`)
+- The bump is one commit directly on `main` titled `chore: release vX.Y.Z`, followed by a git tag `vX.Y.Z` pushed to GitHub.
+
+### 6. Before opening a PR
 - Run the tests for the project you changed (`npm test` in `backend/` or `frontend/`) and make sure they pass.
 - Do not commit `node_modules`, build output, `.aws-sam/`, or secrets.
 
