@@ -44,6 +44,13 @@ describe('validateQuery defaults and missing values', () => {
     });
   });
 
+  it('treats null values as not provided', () => {
+    const result = validateQuery({ minPrice: null, page: null });
+    expect(result.isValid).toBe(true);
+    expect(result.values.minPrice).toBeUndefined();
+    expect(result.values.page).toBe(1);
+  });
+
   it('ignores keys that are not listed in the spec', () => {
     const result = validateQuery({ sort: 'price', foo: 'bar', city: 'Springfield' });
     expect(result.isValid).toBe(true);

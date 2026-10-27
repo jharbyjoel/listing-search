@@ -7,7 +7,7 @@ const DEFAULT_PAGE_SIZE = 10;
 
 // Returns the trimmed string, or undefined when the value is missing or blank.
 function cleanString(rawValue) {
-  if (rawValue === undefined) {
+  if (rawValue === undefined || rawValue === null) {
     return undefined;
   }
   const trimmed = rawValue.trim();
