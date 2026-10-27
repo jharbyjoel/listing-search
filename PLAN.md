@@ -20,18 +20,20 @@ Separate projects (no workspaces):
 
 ```
 listing-search/
-├── shared/validateQuery.js        # imported by both backend and frontend (relative path)
 ├── backend/
 │   ├── package.json
-│   ├── template.yaml              # SAM, BuildMethod: esbuild (bundles ../shared)
-│   ├── src/handler.js             # thin wrapper: parse query → validate → search → JSON
+│   ├── template.yaml              # SAM: function (esbuild) + ValidationLayer
+│   ├── vitest.config.js           # alias /opt/nodejs → layers/validation/nodejs for local tests
+│   ├── layers/validation/nodejs/validateQuery.js   # Lambda layer: server-side validation
+│   ├── src/handler.js             # thin wrapper: parse query → validate (from layer) → search → JSON
 │   ├── src/search.js              # filter → score → sort → paginate (pure; `now` injected)
 │   ├── src/scoring.js
 │   ├── data/sample_listings.json
 │   └── test/
 ├── frontend/
 │   ├── package.json
-│   ├── vite.config.js             # /api proxy → localhost:3000; server.fs.allow for ../shared
+│   ├── vite.config.js             # /api proxy → localhost:3000
+│   ├── src/utility/validateQuery.js   # client-side validation (separate copy of the rules)
 │   ├── src/
 │   └── test/
 └── README.md                      # setup, API, scoring, trade-offs
@@ -77,7 +79,13 @@ GET /listings?minPrice=&maxPrice=&minBedrooms=&city=&keyword=&targetBudget=&page
 ```
 CORS headers returned from the Lambda (for the deployed case).
 
-### Validation (`shared/validateQuery.js`, collects all errors)
+### Validation (collects all errors)
+
+Server-side validation lives in a **Lambda layer** (`backend/layers/validation/nodejs/validateQuery.js`). The handler imports it from `/opt/nodejs/validateQuery.js` (the layer's path inside Lambda); `template.yaml` marks `/opt/nodejs/*` as external for esbuild, and `backend/vitest.config.js` aliases that path to the local layer folder so tests run without SAM.
+
+The frontend has its **own copy** of the same rules in `frontend/src/utility/validateQuery.js`. The two files are intentionally separate (no shared import). Both must implement the rules below identically, and each has its own tests.
+
+Rules:
 - Numeric params must parse as finite numbers, no negatives; `minBedrooms`, `page`, `pageSize` integers
 - `targetBudget` > 0 if given
 - `minPrice > maxPrice` → 400
@@ -91,7 +99,7 @@ CORS headers returned from the Lambda (for the deployed case).
 - Single page: filter form (minPrice, maxPrice, minBedrooms, city, keyword, targetBudget, pageSize) + results table (address, city, price, beds, baths, status, listed date, score) + Prev/Next with "Page X of Y"
 - Search fires on **Search button submit**; page changes fetch immediately
 - Filters + page **synced to the URL** query string (refresh/share keeps state)
-- Client runs `validateQuery()` before fetching for instant field errors; server remains the authority and its 400 `details` are mapped to fields too
+- Client runs `validateQuery()` from `src/utility/validateQuery.js` before fetching for instant field errors; server remains the authority and its 400 `details` are mapped to fields too
 - States: loading, no results, field errors, general error banner (network/500)
 - Dev: Vite proxy `/api` → `http://localhost:3000` (SAM local)
 
@@ -121,15 +129,16 @@ Each row is one task, one branch, one PR. PRs merge in order; later PRs build on
 |---|---|---|---|
 | 0 | `chore/repo-setup` | repo | `PLAN.md`, `CLAUDE.md`, PR template, `.gitignore` |
 | 1 | `backend/project-setup` | backend | `backend/package.json` (ES modules, Vitest), copy `sample_listings.json` into `backend/data/`, `src/loadListings.js` + test |
-| 2 | `shared/validate-query` | shared | `shared/validateQuery.js` (all validation rules except unknown city) + tests (run from backend's Vitest) |
+| 2 | `backend/validation-layer` | lambda layer | `layers/validation/nodejs/validateQuery.js` (all rules except unknown city), `vitest.config.js` alias for `/opt/nodejs` + tests |
 | 3 | `backend/scoring` | backend | `src/scoring.js`: budgetScore, recencyScore, combined score with injected `now` + tests |
 | 4 | `backend/filter-sort` | backend | `src/search.js` filtering + tie-break sorting + tests |
 | 5 | `backend/pagination` | backend | Pagination in `src/search.js` and the full `searchListings()` pipeline + tests |
 | 6 | `backend/lambda-handler` | lambda | `src/handler.js` (parse, validate, unknown-city 400, search, 200/400/500, CORS) + handler tests |
-| 7 | `backend/sam-template` | lambda | `template.yaml` (esbuild, `/listings` GET) + run instructions; verify with `sam local start-api` |
-| 8 | `frontend/project-setup` | frontend | Vite + React scaffold, Vitest + RTL config, `/api` proxy, `fs.allow` for `../shared`, `src/api.js` fetch client |
-| 9 | `frontend/search-form` | frontend | Filter form, client validation via `validateQuery`, field errors, URL sync |
-| 10 | `frontend/results-and-pagination` | frontend | Results table, Prev/Next "Page X of Y", loading / no-results / error states |
-| 11 | `frontend/tests` | tests | ~4 RTL tests: loading, no results, error display, pagination |
-| 12 | `docs/readme` | docs | `README.md`: setup, API, scoring rationale, trade-offs, extensions |
+| 7 | `backend/sam-template` | lambda | `template.yaml` (function with esbuild, `/opt/nodejs/*` external; `ValidationLayer`; `/listings` GET) + run instructions; verify with `sam local start-api` |
+| 8 | `frontend/project-setup` | frontend | Vite + React scaffold, Vitest + RTL config, `/api` proxy, `src/api.js` fetch client |
+| 9 | `frontend/validation-utility` | frontend | `src/utility/validateQuery.js` (same rules as the layer) + tests |
+| 10 | `frontend/search-form` | frontend | Filter form, client validation via `src/utility/validateQuery.js`, field errors, URL sync |
+| 11 | `frontend/results-and-pagination` | frontend | Results table, Prev/Next "Page X of Y", loading / no-results / error states |
+| 12 | `frontend/tests` | tests | ~4 RTL tests: loading, no results, error display, pagination |
+| 13 | `docs/readme` | docs | `README.md`: setup, API, scoring rationale, trade-offs, extensions |
 | — | (optional, later) | infra | AWS deploy — only if the user asks |
