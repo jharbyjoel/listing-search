@@ -1,5 +1,5 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import SearchForm from '../src/components/SearchForm.jsx'
 
 const emptyValues = {
@@ -13,10 +13,6 @@ const emptyValues = {
 }
 
 describe('SearchForm', () => {
-  afterEach(() => {
-    cleanup()
-  })
-
   it('calls onSearch with the typed values when submitted', () => {
     const onSearch = vi.fn()
     render(<SearchForm initialValues={emptyValues} fieldErrors={{}} onSearch={onSearch} />)
