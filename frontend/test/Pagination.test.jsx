@@ -41,4 +41,13 @@ describe('Pagination', () => {
     expect(onPageChange).toHaveBeenLastCalledWith(3)
     expect(onPageChange).toHaveBeenCalledTimes(2)
   })
+
+  it('jumps Previous to the last page when the current page is past the end', () => {
+    const onPageChange = vi.fn()
+    render(<Pagination page={99} totalPages={2} isLoading={false} onPageChange={onPageChange} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Previous' }))
+
+    expect(onPageChange).toHaveBeenCalledWith(2)
+  })
 })
