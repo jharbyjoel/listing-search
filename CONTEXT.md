@@ -38,4 +38,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 
 - 2026-10-27, PR #22, sub agent (Haiku 5.5): Added this file and the ask-first, readability, CONTEXT.md and self-check rules to CLAUDE.md. No code, VERSION or README changes.
 - 2026-10-27, v0.11.6, manager (Opus 5.5): Reviewed PR #22 (sent back once for a missing Notes section and two inaccurate CONTEXT.md lines), merged it and released v0.11.6. From now on every PR must update CONTEXT.md, and every sub agent report must include the checklist self-check.
-- 2026-10-27, PR #<n>, sub agent (Haiku 5.5): `npm run sam:build` succeeded; 10 of 10 smoke requests matched expectations, no failures. Both layers load at `/opt/nodejs`.
+- 2026-10-27, PR #23, sub agent (Haiku 5.5): `npm run sam:build` succeeded; 10 of 10 smoke requests matched expectations, no failures. Both layers load at `/opt/nodejs`.
