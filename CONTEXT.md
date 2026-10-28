@@ -6,7 +6,7 @@ This file is the shared memory for agents working in this repo. Read it before s
 
 ## Current state
 
-As of 2026-10-27, v0.12.0.
+As of 2026-10-28, v0.13.0.
 
 - All PLAN.md PRs #0–#13 are merged.
 - The backend layout is now:
@@ -33,7 +33,7 @@ As of 2026-10-27, v0.12.0.
 
 ## Known gaps / things to watch
 
-- Out-of-range or non-integer page/pageSize skip the cache and go straight to the API, so the server returns its 400. The frontend does not validate these yet (PLAN PR 10).
+- Only the search form runs client validation (on Search). Values loaded from the URL (refresh or shared link) go straight to `runSearch`, so out-of-range or non-integer page/pageSize from a URL skip the cache and the server returns its 400.
 - SAM CLI 1.170.0 is installed at `C:\Program Files\Amazon\AWSSAMCLI\bin\`. VS Code terminals only see it on PATH after VS Code has fully restarted.
 - With both layers loading at `/opt/nodejs`, `sam build` and `sam local start-api` now work. All 10 smoke requests in the verification run matched expectations.
 - Run SAM through the npm scripts (`npm run sam:build`, `npm run sam:start`), not bare `sam build`. With npm 9+ SAM cannot find the project-local esbuild unless node_modules/.bin is on PATH, which `npm run` provides.
@@ -55,3 +55,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 - 2026-10-27, v0.12.0, manager (Opus 5.5): Reviewed and merged PR #25 (74/74 frontend tests and lint passing on my run). The user approved the tagged-JSON cache key format. Next: PR 17 frontend/prefetch-paging.
 - 2026-10-27, PR #26, sub agent (Haiku 5.5): Wired `loadListingsPage` (`frontend/src/utility/loadListingsPage.js`) into `runSearch` in App.jsx. Prefetches max(20, pageSize), builds pages from the cached block, otherwise API + cache. Updated the Next-page App test (12 fake rows, no second fetch) and the Loading test (waits for the fetch). Frontend tests 82/82 and lint passing. Open question for the manager: out-of-range paging bypasses the cache (see Known gaps).
 - 2026-10-28, PR #26, sub agent (Haiku 5.5): Docs follow-up: PLAN.md (max(20, pageSize) prefetch, empty pageSize = 10, paging guard, loadListingsPage.js), README tree (listingsCache.js, loadListingsPage.js), CLAUDE.md rule 4 (docs go in the same PR).
+- 2026-10-28, v0.13.0, manager (Opus 5.5): Reviewed and merged PR #26 (82/82 frontend tests and lint passing on my run). The first sub agent stalled during the docs follow-up and left uncommitted edits on main; I moved them onto the PR branch with a stash, and a fresh sub agent finished and pushed them. The user resolved the paging-guard question (kept). Prefetch + IndexedDB paging (PLAN rows 15-17) is complete.
