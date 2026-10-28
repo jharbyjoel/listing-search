@@ -6,7 +6,7 @@ This file is the shared memory for agents working in this repo. Read it before s
 
 ## Current state
 
-As of 2026-10-27, v0.11.5 (this PR's release will make it v0.11.6; the manager updates this line on release).
+As of 2026-10-27, v0.11.6.
 
 - All PLAN.md PRs #0–#13 are merged.
 - The backend layout is now:
@@ -35,3 +35,4 @@ As of 2026-10-27, v0.11.5 (this PR's release will make it v0.11.6; the manager u
 Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <what was done / what to know>`
 
 - 2026-10-27, PR #22, sub agent (Haiku 5.5): Added this file and the ask-first, readability, CONTEXT.md and self-check rules to CLAUDE.md. No code, VERSION or README changes.
+- 2026-10-27, v0.11.6, manager (Opus 5.5): Reviewed PR #22 (sent back once for a missing Notes section and two inaccurate CONTEXT.md lines), merged it and released v0.11.6. From now on every PR must update CONTEXT.md, and every sub agent report must include the checklist self-check.
