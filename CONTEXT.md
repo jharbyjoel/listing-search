@@ -6,7 +6,7 @@ This file is the shared memory for agents working in this repo. Read it before s
 
 ## Current state
 
-As of 2026-10-27, v0.11.8.
+As of 2026-10-27, v0.12.0.
 
 - All PLAN.md PRs #0–#13 are merged.
 - The backend layout is now:
@@ -48,3 +48,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 - 2026-10-27, PR #24, sub agent (Haiku 5.5): Added the approved prefetch + IndexedDB cache behavior to PLAN.md (Frontend, repo layout, Tests, PR breakdown rows 15–17). Docs only. Pages are built locally only when all rows are within the first 20; the last page is not special-cased. No code, VERSION or README changes.
 - 2026-10-27, v0.11.8, manager (Opus 5.5): Reviewed and merged PR #24 (sent back once: the PR body credited the last-page rule to the manager; it was the user's decision). Next: PR 16 frontend/listings-cache, then PR 17 frontend/prefetch-paging.
 - 2026-10-27, PR #25, sub agent (Haiku 5.5): Added `frontend/src/utility/listingsCache.js` (plain IndexedDB, database `listing-search`, store `listingsCache`, 5-minute expiry, never throws) with tests in `frontend/test/listingsCache.test.js`. Added `fake-indexeddb` as a frontend devDependency. First-results keys use filters only; page keys add pageSize and page. Not wired into the app yet (PR 17).
+- 2026-10-27, v0.12.0, manager (Opus 5.5): Reviewed and merged PR #25 (74/74 frontend tests and lint passing on my run). The user approved the tagged-JSON cache key format. Next: PR 17 frontend/prefetch-paging.
