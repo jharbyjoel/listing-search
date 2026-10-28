@@ -22,13 +22,15 @@ Separate projects (no workspaces):
 listing-search/
 ├── backend/
 │   ├── package.json
-│   ├── template.yaml              # SAM: function (esbuild) + ValidationLayer
-│   ├── vitest.config.js           # alias /opt/nodejs → layers/validation/nodejs for local tests
+│   ├── template.yaml              # SAM: function (esbuild) + ValidationLayer + UtilLayer
+│   ├── vitest.config.js           # aliases /opt/nodejs/* → local layer files for local tests
 │   ├── layers/validation/nodejs/validateQuery.js   # Lambda layer: server-side validation
-│   ├── src/handler.js             # thin wrapper: parse query → validate (from layer) → search → JSON
-│   ├── src/search.js              # filter → score → sort → paginate (pure; `now` injected)
-│   ├── src/scoring.js
-│   ├── data/sample_listings.json
+│   ├── layers/util/nodejs/        # Lambda layer: data loading and search
+│   │   ├── loadListings.js
+│   │   ├── search.js              # filter → score → sort → paginate (pure; `now` injected)
+│   │   ├── scoring.js
+│   │   └── data/sample_listings.json
+│   ├── lambda/get-listings/handler.js   # thin wrapper: parse query → validate (from layer) → search → JSON
 │   └── test/
 ├── frontend/
 │   ├── package.json
@@ -81,7 +83,7 @@ CORS headers returned from the Lambda (for the deployed case).
 
 ### Validation (collects all errors)
 
-Server-side validation lives in a **Lambda layer** (`backend/layers/validation/nodejs/validateQuery.js`). The handler imports it from `/opt/nodejs/validateQuery.js` (the layer's path inside Lambda); `template.yaml` marks `/opt/nodejs/*` as external for esbuild, and `backend/vitest.config.js` aliases that path to the local layer folder so tests run without SAM.
+Server-side validation lives in a **Lambda layer** (`backend/layers/validation/nodejs/validateQuery.js`). The handler imports it from `/opt/nodejs/validateQuery.js` (the layer's path inside Lambda); `template.yaml` marks `/opt/nodejs/*` as external for esbuild, and `backend/vitest.config.js` aliases those paths to the local layer files so tests run without SAM.
 
 The frontend has its **own copy** of the same rules in `frontend/src/utility/validateQuery.js`. The two files are intentionally separate (no shared import). Both must implement the rules below identically, and each has its own tests.
 
@@ -128,12 +130,12 @@ Each row is one task, one branch, one PR. PRs merge in order; later PRs build on
 | # | Branch | Area | Task |
 |---|---|---|---|
 | 0 | `chore/repo-setup` | repo | `PLAN.md`, `CLAUDE.md`, PR template, `.gitignore` |
-| 1 | `backend/project-setup` | backend | `backend/package.json` (ES modules, Vitest), copy `sample_listings.json` into `backend/data/`, `src/loadListings.js` + test |
+| 1 | `backend/project-setup` | backend | `backend/package.json` (ES modules, Vitest), copy `sample_listings.json` into `backend/layers/util/nodejs/data/`, `layers/util/nodejs/loadListings.js` + test |
 | 2 | `backend/validation-layer` | lambda layer | `layers/validation/nodejs/validateQuery.js` (all rules except unknown city), `vitest.config.js` alias for `/opt/nodejs` + tests |
-| 3 | `backend/scoring` | backend | `src/scoring.js`: budgetScore, recencyScore, combined score with injected `now` + tests |
-| 4 | `backend/filter-sort` | backend | `src/search.js` filtering + tie-break sorting + tests |
-| 5 | `backend/pagination` | backend | Pagination in `src/search.js` and the full `searchListings()` pipeline + tests |
-| 6 | `backend/lambda-handler` | lambda | `src/handler.js` (parse, validate, unknown-city 400, search, 200/400/500, CORS) + handler tests |
+| 3 | `backend/scoring` | backend | `layers/util/nodejs/scoring.js`: budgetScore, recencyScore, combined score with injected `now` + tests |
+| 4 | `backend/filter-sort` | backend | `layers/util/nodejs/search.js` filtering + tie-break sorting + tests |
+| 5 | `backend/pagination` | backend | Pagination in `layers/util/nodejs/search.js` and the full `searchListings()` pipeline + tests |
+| 6 | `backend/lambda-handler` | lambda | `lambda/get-listings/handler.js` (parse, validate, unknown-city 400, search, 200/400/500, CORS) + handler tests |
 | 7 | `backend/sam-template` | lambda | `template.yaml` (function with esbuild, `/opt/nodejs/*` external; `ValidationLayer`; `/listings` GET) + run instructions; verify with `sam local start-api` |
 | 8 | `frontend/project-setup` | frontend | Vite + React scaffold, Vitest + RTL config, `/api` proxy, `src/api.js` fetch client |
 | 9 | `frontend/validation-utility` | frontend | `src/utility/validateQuery.js` (same rules as the layer) + tests |
@@ -141,4 +143,5 @@ Each row is one task, one branch, one PR. PRs merge in order; later PRs build on
 | 11 | `frontend/results-and-pagination` | frontend | Results table, Prev/Next "Page X of Y", loading / no-results / error states |
 | 12 | `frontend/tests` | tests | ~4 RTL tests: loading, no results, error display, pagination |
 | 13 | `docs/readme` | docs | `README.md`: setup, API, scoring rationale, trade-offs, extensions |
+| 14 | `backend/lambda-util-layer` | lambda | Move handler to `lambda/get-listings/`, other backend code + data into the util layer |
 | — | (optional, later) | infra | AWS deploy — only if the user asks |
