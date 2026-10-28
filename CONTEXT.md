@@ -15,6 +15,7 @@ As of 2026-10-27, v0.11.8.
   - `backend/layers/util/nodejs/` (loadListings.js, search.js, scoring.js, data/sample_listings.json).
 - Both layers mount at `/opt/nodejs` in Lambda. `backend/vitest.config.js` aliases each `/opt/nodejs/<file>` to its local file.
 - Frontend: Vite + React in `frontend/`.
+- `frontend/src/utility/listingsCache.js` exists (PR 16), with `buildFirstResultsKey`, `buildPageKey`, `saveToCache`, `loadFromCache`. It is not wired into the app yet (PR 17).
 
 ## Decisions made with the user
 
@@ -25,6 +26,7 @@ As of 2026-10-27, v0.11.8.
 - New rules 8 (CONTEXT.md) and 9 (self-check) go at the end of the rules list (PR #22).
 - Never amend commits or force-push. Fix a mistake with a normal follow-up commit, and ask before any history rewrite (user decision after PR #23).
 - Prefetch + cache (planned in PR #24): on Search, fetch `page=1&pageSize=20` and store it in IndexedDB. Pages whose rows are all within the first 20 are built locally; any other page calls the API with the user's pageSize and is cached. Cache expires after 5 minutes. Key for the first 20 is filters only. Plain IndexedDB, `fake-indexeddb` for tests only, no API change. If IndexedDB fails, fall back to API calls.
+- Cache keys are tagged JSON arrays of the filter values in a fixed order, plus pageSize and page for page keys (user approved in PR #25).
 
 ## Known gaps / things to watch
 
@@ -45,3 +47,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 - 2026-10-27, v0.11.7, manager (Opus 5.5): Reviewed and merged PR #23. SAM local is verified end to end. The sub agent tried an amend plus force-push before asking; auto-mode blocked it and main was unaffected. The user decided to merge and record the no-force-push rule above.
 - 2026-10-27, PR #24, sub agent (Haiku 5.5): Added the approved prefetch + IndexedDB cache behavior to PLAN.md (Frontend, repo layout, Tests, PR breakdown rows 15–17). Docs only. Pages are built locally only when all rows are within the first 20; the last page is not special-cased. No code, VERSION or README changes.
 - 2026-10-27, v0.11.8, manager (Opus 5.5): Reviewed and merged PR #24 (sent back once: the PR body credited the last-page rule to the manager; it was the user's decision). Next: PR 16 frontend/listings-cache, then PR 17 frontend/prefetch-paging.
+- 2026-10-27, PR #25, sub agent (Haiku 5.5): Added `frontend/src/utility/listingsCache.js` (plain IndexedDB, database `listing-search`, store `listingsCache`, 5-minute expiry, never throws) with tests in `frontend/test/listingsCache.test.js`. Added `fake-indexeddb` as a frontend devDependency. First-results keys use filters only; page keys add pageSize and page. Not wired into the app yet (PR 17).
