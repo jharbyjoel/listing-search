@@ -6,7 +6,7 @@ This file is the shared memory for agents working in this repo. Read it before s
 
 ## Current state
 
-As of 2026-10-28, v0.13.0.
+As of 2026-10-28, v0.13.1.
 
 - All PLAN.md PRs #0–#13 are merged.
 - The backend layout is now:
@@ -57,3 +57,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 - 2026-10-28, PR #26, sub agent (Haiku 5.5): Docs follow-up: PLAN.md (max(20, pageSize) prefetch, empty pageSize = 10, paging guard, loadListingsPage.js), README tree (listingsCache.js, loadListingsPage.js), CLAUDE.md rule 4 (docs go in the same PR).
 - 2026-10-28, v0.13.0, manager (Opus 5.5): Reviewed and merged PR #26 (82/82 frontend tests and lint passing on my run). The first sub agent stalled during the docs follow-up and left uncommitted edits on main; I moved them onto the PR branch with a stash, and a fresh sub agent finished and pushed them. The user resolved the paging-guard question (kept). Prefetch + IndexedDB paging (PLAN rows 15-17) is complete.
 - 2026-10-28, PR #27, sub agent (Haiku 5.5): Added the user-approved scoring rationale comment at the top of scoring.js (formula + why). Comment only, no logic change.
+- 2026-10-28, v0.13.1, manager (Opus 5.5): Reviewed and merged PR #27 (comment only; the user approved the text; I confirmed the sample date range Jul 28 to Sep 4, 2026 against the data).
