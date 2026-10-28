@@ -27,6 +27,7 @@ As of 2026-10-27, v0.12.0.
 - New rules 8 (CONTEXT.md) and 9 (self-check) go at the end of the rules list (PR #22).
 - Never amend commits or force-push. Fix a mistake with a normal follow-up commit, and ask before any history rewrite (user decision after PR #23).
 - Prefetch + cache (planned in PR #24): on Search, fetch `page=1&pageSize=20` and store it in IndexedDB. Pages whose rows are all within the first 20 are built locally; any other page calls the API with the user's pageSize and is cached. Cache expires after 5 minutes. Key for the first 20 is filters only. Plain IndexedDB, `fake-indexeddb` for tests only, no API change. If IndexedDB fails, fall back to API calls.
+- Prefetch size is max(20, pageSize); an empty pageSize means 10 (user decision, PR #26).
 - Cache keys are tagged JSON arrays of the filter values in a fixed order, plus pageSize and page for page keys (user approved in PR #25).
 
 ## Known gaps / things to watch
@@ -52,3 +53,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 - 2026-10-27, v0.11.8, manager (Opus 5.5): Reviewed and merged PR #24 (sent back once: the PR body credited the last-page rule to the manager; it was the user's decision). Next: PR 16 frontend/listings-cache, then PR 17 frontend/prefetch-paging.
 - 2026-10-27, PR #25, sub agent (Haiku 5.5): Added `frontend/src/utility/listingsCache.js` (plain IndexedDB, database `listing-search`, store `listingsCache`, 5-minute expiry, never throws) with tests in `frontend/test/listingsCache.test.js`. Added `fake-indexeddb` as a frontend devDependency. First-results keys use filters only; page keys add pageSize and page. Not wired into the app yet (PR 17).
 - 2026-10-27, v0.12.0, manager (Opus 5.5): Reviewed and merged PR #25 (74/74 frontend tests and lint passing on my run). The user approved the tagged-JSON cache key format. Next: PR 17 frontend/prefetch-paging.
+- 2026-10-27, PR #26, sub agent (Haiku 5.5): Wired `loadListingsPage` (`frontend/src/utility/loadListingsPage.js`) into `runSearch` in App.jsx. Prefetches max(20, pageSize), builds pages from the cached block, otherwise API + cache. Updated the Next-page App test (12 fake rows, no second fetch) and the Loading test (waits for the fetch). Frontend tests 82/82 and lint passing. Open question for the manager: out-of-range paging bypasses the cache (see Known gaps).
