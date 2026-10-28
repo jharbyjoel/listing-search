@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { handler } from '../src/handler.js';
-import { searchListings } from '../src/search.js';
+import { handler } from '../lambda/get-listings/handler.js';
+import { searchListings } from '/opt/nodejs/search.js';
 
 // Real searchListings by default. The 500 test makes it throw once.
-vi.mock('../src/search.js', async (importOriginal) => {
+vi.mock('/opt/nodejs/search.js', async (importOriginal) => {
   const actual = await importOriginal();
   return { ...actual, searchListings: vi.fn(actual.searchListings) };
 });

@@ -2,8 +2,10 @@
 #
 # - ValidationLayer: the shared validation rules, mounted in Lambda at /opt/nodejs/.
 #   The handler imports it as /opt/nodejs/validateQuery.js, so esbuild must not bundle it.
-# - ListingsFunction: bundles src/handler.js with esbuild into one ES module file.
-#   '/opt/nodejs/*' is marked external so esbuild leaves that import alone.
+# - UtilLayer: the listing data, search and scoring code, also mounted at /opt/nodejs/.
+#   The handler imports it as /opt/nodejs/loadListings.js and /opt/nodejs/search.js.
+# - ListingsFunction: bundles lambda/get-listings/handler.js with esbuild into one ES module file.
+#   '/opt/nodejs/*' is marked external so esbuild leaves those imports alone.
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Listing search API (local via sam local start-api)
@@ -17,6 +19,14 @@ Resources:
       CompatibleRuntimes:
         - nodejs22.x
 
+  UtilLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: listing-search-util
+      ContentUri: layers/util
+      CompatibleRuntimes:
+        - nodejs22.x
+
   ListingsFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -25,7 +35,7 @@ Resources:
         Format: esm
         Target: es2022
         EntryPoints:
-          - src/handler.js
+          - lambda/get-listings/handler.js
         External:
           - /opt/nodejs/*
         OutExtension:
@@ -37,6 +47,7 @@ Resources:
       Timeout: 10
       Layers:
         - !Ref ValidationLayer
+        - !Ref UtilLayer
       Events:
         ListListings:
           Type: Api

@@ -1,11 +1,27 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
+// Inside Lambda both layers are mounted at /opt/nodejs and their contents merge there.
+// Tests map each /opt/nodejs file to the matching file in its local layer folder.
 export default defineConfig({
   resolve: {
-    alias: {
-      // Inside Lambda the validation layer is mounted at /opt/nodejs, so tests map that path to the local layer folder.
-      '/opt/nodejs': fileURLToPath(new URL('./layers/validation/nodejs', import.meta.url)),
-    },
+    alias: [
+      {
+        find: '/opt/nodejs/validateQuery.js',
+        replacement: fileURLToPath(new URL('./layers/validation/nodejs/validateQuery.js', import.meta.url)),
+      },
+      {
+        find: '/opt/nodejs/loadListings.js',
+        replacement: fileURLToPath(new URL('./layers/util/nodejs/loadListings.js', import.meta.url)),
+      },
+      {
+        find: '/opt/nodejs/search.js',
+        replacement: fileURLToPath(new URL('./layers/util/nodejs/search.js', import.meta.url)),
+      },
+      {
+        find: '/opt/nodejs/scoring.js',
+        replacement: fileURLToPath(new URL('./layers/util/nodejs/scoring.js', import.meta.url)),
+      },
+    ],
   },
 });

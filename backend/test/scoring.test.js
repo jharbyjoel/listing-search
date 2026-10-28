@@ -4,7 +4,7 @@ import {
   daysSinceListed,
   recencyScore,
   scoreListing,
-} from '../src/scoring.js';
+} from '/opt/nodejs/scoring.js';
 
 const NOW = new Date('2026-10-27T15:00:00Z');
 

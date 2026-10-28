@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { loadListings } from '../src/loadListings.js';
+import { loadListings } from '/opt/nodejs/loadListings.js';
 
 describe('loadListings', () => {
   it('returns the 12 sample listings', () => {
