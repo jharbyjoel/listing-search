@@ -15,7 +15,8 @@ As of 2026-10-27, v0.12.0.
   - `backend/layers/util/nodejs/` (loadListings.js, search.js, scoring.js, data/sample_listings.json).
 - Both layers mount at `/opt/nodejs` in Lambda. `backend/vitest.config.js` aliases each `/opt/nodejs/<file>` to its local file.
 - Frontend: Vite + React in `frontend/`.
-- `frontend/src/utility/listingsCache.js` exists (PR 16), with `buildFirstResultsKey`, `buildPageKey`, `saveToCache`, `loadFromCache`. It is not wired into the app yet (PR 17).
+- `frontend/src/utility/listingsCache.js` exists (PR 16), with `buildFirstResultsKey`, `buildPageKey`, `saveToCache`, `loadFromCache`.
+- The app now uses `loadListingsPage` (`frontend/src/utility/loadListingsPage.js`, PR 17). Search prefetches max(20, pageSize) results. Pages whose rows are all in the prefetched block are built locally. Other pages use the API plus the cache. If IndexedDB fails, every page calls the API.
 
 ## Decisions made with the user
 
@@ -30,6 +31,8 @@ As of 2026-10-27, v0.12.0.
 
 ## Known gaps / things to watch
 
+- PLAN.md still says the prefetch is always 20; a docs PR will update it to max(20, pageSize).
+- Out-of-range or non-integer page/pageSize skip the cache and go straight to the API, so the server returns its 400. The frontend does not validate these yet (PLAN PR 10).
 - SAM CLI 1.170.0 is installed at `C:\Program Files\Amazon\AWSSAMCLI\bin\`. VS Code terminals only see it on PATH after VS Code has fully restarted.
 - With both layers loading at `/opt/nodejs`, `sam build` and `sam local start-api` now work. All 10 smoke requests in the verification run matched expectations.
 - Run SAM through the npm scripts (`npm run sam:build`, `npm run sam:start`), not bare `sam build`. With npm 9+ SAM cannot find the project-local esbuild unless node_modules/.bin is on PATH, which `npm run` provides.
