@@ -26,6 +26,7 @@ As of 2026-10-27, v0.11.8.
 - New rules 8 (CONTEXT.md) and 9 (self-check) go at the end of the rules list (PR #22).
 - Never amend commits or force-push. Fix a mistake with a normal follow-up commit, and ask before any history rewrite (user decision after PR #23).
 - Prefetch + cache (planned in PR #24): on Search, fetch `page=1&pageSize=20` and store it in IndexedDB. Pages whose rows are all within the first 20 are built locally; any other page calls the API with the user's pageSize and is cached. Cache expires after 5 minutes. Key for the first 20 is filters only. Plain IndexedDB, `fake-indexeddb` for tests only, no API change. If IndexedDB fails, fall back to API calls.
+- Cache keys are tagged JSON arrays of the filter values in a fixed order, plus pageSize and page for page keys (user approved in PR #25).
 
 ## Known gaps / things to watch
 
