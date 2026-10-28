@@ -1,6 +1,6 @@
 # Agent Instructions
 
-Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is the source of truth for what to build; this file is the source of truth for how to work.
+Read this file, `PLAN.md` and `CONTEXT.md` before doing any work in this repo. `PLAN.md` is the source of truth for what to build; this file is the source of truth for how to work. `CONTEXT.md` is the running record of what has been built and decided so far.
 
 ## Roles
 
@@ -14,7 +14,13 @@ Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is th
 - If something seems missing, wrong, or worth adding, **stop and report it** instead of building it. The manager will take it to the user.
 - This applies to the manager too. No "while I'm here" changes, extra features, extra dependencies, or refactors outside the task.
 
-### 2. Readable code over clever code
+### 2. Ask, don't decide
+- If you are unsure about anything, ask for clarification before acting. Do not make decisions on your own, however trivial they seem.
+- This applies to every agent, including the manager.
+- Sub agents stop and report the question to the manager. The manager takes every question to the user and never answers it on the user's behalf.
+
+### 3. Readable code over clever code
+- Code should read as if it were written for a beginner: easy to read and follow, with names that say what each variable and function is for and what it does.
 - Write code a reviewer can understand on the first read, even if that means repeating yourself. DRY is not a goal here.
 - Use descriptive names (`listingsMatchingCity`, not `lmc`; `listing`, not `l`).
 - Prefer plain `if` statements and `for` loops over nested ternaries, chained one-liners, or reduce tricks.
@@ -22,17 +28,17 @@ Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is th
 - One function does one thing. Keep functions short enough to read without scrolling.
 - Add a short comment only where the *why* is not obvious from the code (for example, the scoring formula).
 
-### 3. Small, focused PRs
+### 4. Small, focused PRs
 - One task = one branch = one PR.
 - A PR touches one area (backend, Lambda layers (validation, util), frontend, or tests for one of those). Tests for the code in a PR go in the same PR.
 - Aim for a PR a human can review in about 10 minutes (roughly under 300 changed lines, excluding lockfiles and sample data).
 - Branch names: `<area>/<short-task-name>`, for example `backend/scoring`, `frontend/results-table`.
 
-### 4. PR descriptions
+### 5. PR descriptions
 - Use `.github/pull_request_template.md` for every PR. Do not add or remove sections.
 - Keep it short: the core idea only. No long lists of every file changed.
 
-### 5. Versioning
+### 6. Versioning
 - The project version lives in the root `VERSION` file (semantic versioning, `MAJOR.MINOR.PATCH`). It covers the whole repo, backend and frontend together.
 - Every PR title starts with its type: `feat:`, `fix:`, `docs:`, `chore:`, or `test:`. Add `!` after the type for a breaking change (e.g. `feat!: ...`).
 - The **manager** bumps the version manually after each PR merge. Sub agents never edit `VERSION`.
@@ -41,9 +47,19 @@ Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is th
   - `fix:`, `docs:`, `chore:`, `test:` → PATCH (`0.4.2` → `0.4.3`)
 - The bump is one commit directly on `main` titled `chore: release vX.Y.Z`, followed by a GitHub Release named `vX.Y.Z` (which creates the tag), e.g. `gh release create vX.Y.Z --title "vX.Y.Z" --notes "- feat: <PR title> (#N)"`. Release notes list the merged PR title(s) only.
 
-### 6. Before opening a PR
+### 7. Before opening a PR
 - Run the tests for the project you changed (`npm test` in `backend/` or `frontend/`) and make sure they pass.
 - Do not commit `node_modules`, build output, `.aws-sam/`, or secrets.
+
+### 8. Keep CONTEXT.md up to date
+- Read CONTEXT.md before starting work.
+- After finishing, add an entry to CONTEXT.md describing what you did, what you decided (with the user's approval), and anything the next agent should know.
+- Sub agents put their CONTEXT.md update in the same PR as their task.
+- The manager adds its own notes (merges, releases, user decisions) to CONTEXT.md in the `chore: release vX.Y.Z` commit on main.
+
+### 9. Self-check before finishing
+- Before reporting a task as complete, each sub agent goes through the review checklist and confirms that every item is met. In its final report, it lists each checklist item with yes or no.
+- The manager then checks the same list independently. It approves and merges a PR only once every item is met. Otherwise it sends the work back.
 
 ## Review checklist (used by the manager on every PR)
 
@@ -52,6 +68,10 @@ Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is th
 - [ ] Touches one area only and is small enough to review quickly
 - [ ] Tests included for new logic and passing
 - [ ] PR description follows the template and is short
+- [ ] Agent read CONTEXT.md and the PR updates it
+- [ ] Nothing was decided without asking; open questions were raised, not guessed
+- [ ] Names describe what each variable and function is for; a beginner could follow the code
+- [ ] Sub agent's self-check is included in its report and every item is met
 
 ## Project facts
 
