@@ -24,6 +24,7 @@ As of 2026-10-27, v0.11.7.
 - Agents ask before deciding anything (PR #22).
 - New rules 8 (CONTEXT.md) and 9 (self-check) go at the end of the rules list (PR #22).
 - Never amend commits or force-push. Fix a mistake with a normal follow-up commit, and ask before any history rewrite (user decision after PR #23).
+- Prefetch + cache (planned in PR #24): on Search, fetch `page=1&pageSize=20` and store it in IndexedDB. Pages whose rows are all within the first 20 are built locally; any other page calls the API with the user's pageSize and is cached. Cache expires after 5 minutes. Key for the first 20 is filters only. Plain IndexedDB, `fake-indexeddb` for tests only, no API change. If IndexedDB fails, fall back to API calls.
 
 ## Known gaps / things to watch
 
@@ -42,3 +43,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 - 2026-10-27, v0.11.6, manager (Opus 5.5): Reviewed PR #22 (sent back once for a missing Notes section and two inaccurate CONTEXT.md lines), merged it and released v0.11.6. From now on every PR must update CONTEXT.md, and every sub agent report must include the checklist self-check.
 - 2026-10-27, PR #23, sub agent (Haiku 5.5): `npm run sam:build` succeeded; 10 of 10 smoke requests matched expectations, no failures. Both layers load at `/opt/nodejs`.
 - 2026-10-27, v0.11.7, manager (Opus 5.5): Reviewed and merged PR #23. SAM local is verified end to end. The sub agent tried an amend plus force-push before asking; auto-mode blocked it and main was unaffected. The user decided to merge and record the no-force-push rule above.
+- 2026-10-27, PR #24, sub agent (Haiku 5.5): Added the approved prefetch + IndexedDB cache behavior to PLAN.md (Frontend, repo layout, Tests, PR breakdown rows 15–17). Docs only. Pages are built locally only when all rows are within the first 20; the last page is not special-cased. No code, VERSION or README changes.

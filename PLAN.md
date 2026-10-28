@@ -36,6 +36,7 @@ listing-search/
 │   ├── package.json
 │   ├── vite.config.js             # /api proxy → localhost:3000
 │   ├── src/utility/validateQuery.js   # client-side validation (separate copy of the rules)
+│   ├── src/utility/listingsCache.js   # IndexedDB cache for prefetched results
 │   ├── src/
 │   └── test/
 └── README.md                      # setup, API, scoring, trade-offs
@@ -99,8 +100,15 @@ Rules:
 ## Frontend
 
 - Single page: filter form (minPrice, maxPrice, minBedrooms, city, keyword, targetBudget, pageSize) + results table (address, city, price, beds, baths, status, listed date, score) + Prev/Next with "Page X of Y"
-- Search fires on **Search button submit**; page changes fetch immediately
 - Filters + page **synced to the URL** query string (refresh/share keeps state)
+- Search fires on **Search button submit**; page changes come from the browser cache where possible (see below)
+  - On Search, one call to the existing API with `page=1&pageSize=20`. Its results and `totalResults` are stored in IndexedDB (`src/utility/listingsCache.js`, plain browser API, no wrapper library). Cache key = filter values only (minPrice, maxPrice, minBedrooms, city, keyword, targetBudget), not page or pageSize
+  - A page whose rows all fall within the first 20 results is built from the prefetched 20, with no API call. `totalPages` is computed from `totalResults` and the user's pageSize
+  - Any other page (it needs a row past result 20, the last page included, or it straddles the 20 boundary, e.g. pageSize 7, page 3) calls the API with the user's pageSize, as today. The response is cached in IndexedDB keyed by filters + pageSize + page
+  - Cache entries expire after 5 minutes (scores depend on today's date) and are refetched after that. New filters mean a new cache key
+  - If IndexedDB is unavailable or throws, the UI falls back to normal API calls
+  - A refreshed or shared URL (e.g. `?page=2`) uses the cache when present, otherwise fetches
+  - No backend/API change. `fake-indexeddb` is a frontend devDependency for tests only
 - Client runs `validateQuery()` from `src/utility/validateQuery.js` before fetching for instant field errors; server remains the authority and its 400 `details` are mapped to fields too
 - States: loading, no results, field errors, general error banner (network/500)
 - Dev: Vite proxy `/api` → `http://localhost:3000` (SAM local)
@@ -119,6 +127,8 @@ Rules:
 
 **Frontend (Vitest + React Testing Library, ~4 tests, `fetch` mocked)**
 - Loading state, no-results state, error display, pagination controls
+- `listingsCache.js` (fake-indexeddb): save/load, 5-minute expiry, separate keys per filter set
+- App: Search prefetches 20; pages inside the 20 make no extra fetch; a page past 20 fetches and is then cached; a boundary-straddling page fetches; IndexedDB failure falls back to API calls
 
 ## README contents
 Setup/run steps (SAM local + Vite), API reference, scoring formula and rationale, trade-offs (JS backend, no DB, duplicates not merged, validation duplicated in a Lambda layer and a frontend utility), and possible extensions (dedup, status filter, configurable weights, DynamoDB/real feed behind the loader).
@@ -144,4 +154,7 @@ Each row is one task, one branch, one PR. PRs merge in order; later PRs build on
 | 12 | `frontend/tests` | tests | ~4 RTL tests: loading, no results, error display, pagination |
 | 13 | `docs/readme` | docs | `README.md`: setup, API, scoring rationale, trade-offs, extensions |
 | 14 | `backend/lambda-util-layer` | lambda | Move handler to `lambda/get-listings/`, other backend code + data into the util layer |
+| 15 | `docs/prefetch-cache-plan` | docs | Add prefetch + IndexedDB cache behavior to PLAN.md |
+| 16 | `frontend/listings-cache` | frontend | `src/utility/listingsCache.js` (plain IndexedDB, 5-min expiry) + tests with fake-indexeddb devDependency |
+| 17 | `frontend/prefetch-paging` | frontend | App: prefetch first 20 on Search, local paging, API + cache for other pages, fallback when IndexedDB fails + tests |
 | — | (optional, later) | infra | AWS deploy — only if the user asks |
