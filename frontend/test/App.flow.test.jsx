@@ -1,3 +1,4 @@
+import 'fake-indexeddb/auto'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../src/App.jsx'
@@ -38,14 +39,24 @@ function fakeSearchBody(overrides) {
   }
 }
 
+// Empties the cache database so no test sees another test's cached results.
+function deleteCacheDatabase() {
+  return new Promise((resolve, reject) => {
+    const deleteRequest = globalThis.indexedDB.deleteDatabase('listing-search')
+    deleteRequest.onsuccess = () => resolve()
+    deleteRequest.onerror = () => reject(deleteRequest.error)
+  })
+}
+
 // Clicks the Search button, which submits the form with the current field values.
 function submitSearch() {
   fireEvent.click(screen.getByRole('button', { name: 'Search' }))
 }
 
 describe('App search flow', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     window.history.replaceState(null, '', '/')
+    await deleteCacheDatabase()
   })
 
   afterEach(() => {
@@ -66,6 +77,8 @@ describe('App search flow', () => {
     submitSearch()
 
     expect(screen.getByText('Loading…')).toBeInTheDocument()
+    // The cache is checked before the API, so wait until the fetch has started.
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled())
 
     resolveFetch(
       fakeResponse(
@@ -117,22 +130,20 @@ describe('App search flow', () => {
   })
 
   it('loads the next page when Next is clicked and puts page=2 in the URL', async () => {
-    const pageOne = fakeSearchBody({
-      results: [fakeListing({ address: '12 Oak Street' })],
-      page: 1,
-      totalResults: 2,
-      totalPages: 2,
+    // Twelve rows: page 1 (pageSize 10) shows rows 1-10, page 2 shows rows 11-12.
+    const prefetchedListings = []
+    for (let number = 1; number <= 12; number++) {
+      prefetchedListings.push(fakeListing({ id: `A${number}`, address: `${number} Filler Road` }))
+    }
+    prefetchedListings[0] = fakeListing({ address: '12 Oak Street' })
+    prefetchedListings[10] = fakeListing({ id: 'A11', address: '34 Pine Avenue' })
+    const prefetchedBody = fakeSearchBody({
+      results: prefetchedListings,
+      pageSize: 20,
+      totalResults: 12,
+      totalPages: 1,
     })
-    const pageTwo = fakeSearchBody({
-      results: [fakeListing({ id: 'A2', address: '34 Pine Avenue' })],
-      page: 2,
-      totalResults: 2,
-      totalPages: 2,
-    })
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(fakeResponse(200, pageOne))
-      .mockResolvedValueOnce(fakeResponse(200, pageTwo))
+    const fetchMock = vi.fn().mockResolvedValue(fakeResponse(200, prefetchedBody))
     vi.stubGlobal('fetch', fetchMock)
     render(<App />)
 
@@ -142,8 +153,8 @@ describe('App search flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
 
     expect(await screen.findByText('34 Pine Avenue')).toBeInTheDocument()
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
-    expect(fetchMock.mock.calls[1][0]).toContain('page=2')
+    // Page 2 comes from the prefetched rows, so there is no second fetch.
+    expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(window.location.search).toContain('page=2')
   })
 })

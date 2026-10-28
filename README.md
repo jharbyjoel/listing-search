@@ -132,6 +132,8 @@ listing-search/
 ├── frontend/
 │   ├── src/App.jsx                      page state, search and pagination flow
 │   ├── src/api.js                       fetch client for GET /api/listings
+│   ├── src/utility/listingsCache.js     IndexedDB cache for prefetched results
+│   ├── src/utility/loadListingsPage.js  prefetch + local paging, falls back to the API
 │   ├── src/components/                  SearchForm, ResultsTable, Pagination
 │   ├── src/utility/                     validateQuery.js (UI copy), urlQuery.js
 │   ├── vite.config.js                   /api proxy to port 3000

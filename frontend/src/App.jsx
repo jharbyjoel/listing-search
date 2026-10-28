@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import Pagination from './components/Pagination.jsx'
 import ResultsTable from './components/ResultsTable.jsx'
 import SearchForm from './components/SearchForm.jsx'
-import { fetchListings } from './api.js'
 import { buildUrlSearch, readQueryFromUrl } from './utility/urlQuery.js'
+import { loadListingsPage } from './utility/loadListingsPage.js'
 
 // Turns the server's 400 details list into an object keyed by field name.
 function fieldErrorsFrom(details) {
@@ -40,7 +40,7 @@ function App() {
     setErrorMessage(null)
     setFieldErrors({})
     try {
-      const result = await fetchListings(query)
+      const result = await loadListingsPage(query)
       if (result.ok) {
         setResponse(result.body)
       } else if (result.status === 400) {
