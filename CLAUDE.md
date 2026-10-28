@@ -33,6 +33,7 @@ Read this file, `PLAN.md` and `CONTEXT.md` before doing any work in this repo. `
 - A PR touches one area (backend, Lambda layers (validation, util), frontend, or tests for one of those). Tests for the code in a PR go in the same PR.
 - Aim for a PR a human can review in about 10 minutes (roughly under 300 changed lines, excluding lockfiles and sample data).
 - Branch names: `<area>/<short-task-name>`, for example `backend/scoring`, `frontend/results-table`.
+- Docs for a change (PLAN.md, README.md, CONTEXT.md, CLAUDE.md) go in the same PR as the change; they do not count as a second area.
 
 ### 5. PR descriptions
 - Use `.github/pull_request_template.md` for every PR. Do not add or remove sections.

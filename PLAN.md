@@ -37,6 +37,7 @@ listing-search/
 │   ├── vite.config.js             # /api proxy → localhost:3000
 │   ├── src/utility/validateQuery.js   # client-side validation (separate copy of the rules)
 │   ├── src/utility/listingsCache.js   # IndexedDB cache for prefetched results
+│   ├── src/utility/loadListingsPage.js   # prefetch + local paging; falls back to the API
 │   ├── src/
 │   └── test/
 └── README.md                      # setup, API, scoring, trade-offs
@@ -102,9 +103,11 @@ Rules:
 - Single page: filter form (minPrice, maxPrice, minBedrooms, city, keyword, targetBudget, pageSize) + results table (address, city, price, beds, baths, status, listed date, score) + Prev/Next with "Page X of Y"
 - Filters + page **synced to the URL** query string (refresh/share keeps state)
 - Search fires on **Search button submit**; page changes come from the browser cache where possible (see below)
-  - On Search, one call to the existing API with `page=1&pageSize=20`. Its results and `totalResults` are stored in IndexedDB (`src/utility/listingsCache.js`, plain browser API, no wrapper library). Cache key = filter values only (minPrice, maxPrice, minBedrooms, city, keyword, targetBudget), not page or pageSize
-  - A page whose rows all fall within the first 20 results is built from the prefetched 20, with no API call. `totalPages` is computed from `totalResults` and the user's pageSize
-  - Any other page (it needs a row past result 20, the last page included, or it straddles the 20 boundary, e.g. pageSize 7, page 3) calls the API with the user's pageSize, as today. The response is cached in IndexedDB keyed by filters + pageSize + page
+  - On Search, one call to the existing API with `page=1&pageSize=max(20, pageSize)`. Its results and `totalResults` are stored in IndexedDB (`src/utility/listingsCache.js`, plain browser API, no wrapper library). Cache key = filter values only (minPrice, maxPrice, minBedrooms, city, keyword, targetBudget), not page or pageSize
+  - A page whose rows all fall within the prefetched block (its first max(20, pageSize) results) is built from that block, with no API call. `totalPages` is computed from `totalResults` and the user's pageSize
+  - An empty pageSize means 10 (the API default). Page/pageSize values that are not whole numbers in range (page ≥ 1, pageSize 1–50) skip the cache and go straight to the API, so the server's 400 is shown
+  - This logic lives in `src/utility/loadListingsPage.js`
+  - Any other page (it needs a row past the prefetched block, the last page included, or it straddles the end of the block, e.g. pageSize 7, page 3) calls the API with the user's pageSize, as today. The response is cached in IndexedDB keyed by filters + pageSize + page
   - Cache entries expire after 5 minutes (scores depend on today's date) and are refetched after that. New filters mean a new cache key
   - If IndexedDB is unavailable or throws, the UI falls back to normal API calls
   - A refreshed or shared URL (e.g. `?page=2`) uses the cache when present, otherwise fetches
@@ -128,7 +131,7 @@ Rules:
 **Frontend (Vitest + React Testing Library, ~4 tests, `fetch` mocked)**
 - Loading state, no-results state, error display, pagination controls
 - `listingsCache.js` (fake-indexeddb): save/load, 5-minute expiry, separate keys per filter set
-- App: Search prefetches 20; pages inside the 20 make no extra fetch; a page past 20 fetches and is then cached; a boundary-straddling page fetches; IndexedDB failure falls back to API calls
+- App: Search prefetches max(20, pageSize); pages inside the prefetched block make no extra fetch; a page past the prefetched block fetches and is then cached; a boundary-straddling page fetches; IndexedDB failure falls back to API calls
 
 ## README contents
 Setup/run steps (SAM local + Vite), API reference, scoring formula and rationale, trade-offs (JS backend, no DB, duplicates not merged, validation duplicated in a Lambda layer and a frontend utility), and possible extensions (dedup, status filter, configurable weights, DynamoDB/real feed behind the loader).
@@ -156,5 +159,5 @@ Each row is one task, one branch, one PR. PRs merge in order; later PRs build on
 | 14 | `backend/lambda-util-layer` | lambda | Move handler to `lambda/get-listings/`, other backend code + data into the util layer |
 | 15 | `docs/prefetch-cache-plan` | docs | Add prefetch + IndexedDB cache behavior to PLAN.md |
 | 16 | `frontend/listings-cache` | frontend | `src/utility/listingsCache.js` (plain IndexedDB, 5-min expiry) + tests with fake-indexeddb devDependency |
-| 17 | `frontend/prefetch-paging` | frontend | App: prefetch first 20 on Search, local paging, API + cache for other pages, fallback when IndexedDB fails + tests |
+| 17 | `frontend/prefetch-paging` | frontend | App: prefetch max(20, pageSize) on Search, local paging, API + cache for other pages, fallback when IndexedDB fails + tests |
 | — | (optional, later) | infra | AWS deploy — only if the user asks |
