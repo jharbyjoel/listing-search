@@ -1,6 +1,6 @@
 import { validateQuery } from '/opt/nodejs/validateQuery.js';
-import { loadListings } from './loadListings.js';
-import { searchListings } from './search.js';
+import { loadListings } from '/opt/nodejs/loadListings.js';
+import { searchListings } from '/opt/nodejs/search.js';
 
 // Builds an API Gateway proxy response with the JSON body and CORS headers.
 function jsonResponse(statusCode, bodyObject) {

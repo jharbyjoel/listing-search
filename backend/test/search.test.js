@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { filterListings, sortScoredListings, paginate, searchListings } from '../src/search.js';
-import { loadListings } from '../src/loadListings.js';
+import { filterListings, sortScoredListings, paginate, searchListings } from '/opt/nodejs/search.js';
+import { loadListings } from '/opt/nodejs/loadListings.js';
 
 function makeListing(overrides) {
   return {
