@@ -1,6 +1,6 @@
 # Listing Search
 
-A full-stack listing search. A React frontend calls a Node.js backend that runs as an AWS Lambda function, run locally with AWS SAM. Listings come from `backend/data/sample_listings.json`, which is loaded into memory. There is no database.
+A full-stack listing search. A React frontend calls a Node.js backend that runs as an AWS Lambda function, run locally with AWS SAM. Listings come from `backend/layers/util/nodejs/data/sample_listings.json`, which is loaded into memory. There is no database.
 
 ## Prerequisites
 
@@ -86,11 +86,11 @@ There are two copies of the rules:
 - **Server (authority):** `backend/layers/validation/nodejs/validateQuery.js`. It is a Lambda layer mounted at `/opt/nodejs` inside Lambda. The Vitest config maps that path to the local folder so tests can import it.
 - **UI copy:** `frontend/src/utility/validateQuery.js`. It gives instant field errors before the request is sent. The server still makes the final decision, and its 400 details are shown on the matching fields.
 
-The two copies must be kept in sync by hand. Each has its own tests. The city check is not in the layer, because it needs the data, so it lives in `handler.js`.
+The two copies must be kept in sync by hand. Each has its own tests. The city check is not in the layer, because it needs the data, so it lives in `lambda/get-listings/handler.js`.
 
 ## Scoring approach
 
-Scores are calculated in `backend/src/scoring.js`:
+Scores are calculated in `backend/layers/util/nodejs/scoring.js`:
 
 ```
 budgetScore  = max(0, 1 - k * |price - targetBudget| / targetBudget)
@@ -120,12 +120,13 @@ Why this approach: buyers usually mind going over budget more than coming in und
 ```
 listing-search/
 ├── backend/
-│   ├── data/sample_listings.json        12 bundled listings
+│   ├── lambda/get-listings/handler.js   Lambda handler: validate, search, respond
+│   ├── layers/util/nodejs/              util Lambda layer: data loading, search, scoring
+│   │   ├── data/sample_listings.json    12 bundled listings
+│   │   ├── loadListings.js              loads the bundled listings
+│   │   ├── search.js                    filter, sort, paginate
+│   │   └── scoring.js                   budget and recency scores
 │   ├── layers/validation/nodejs/        validation Lambda layer (validateQuery.js)
-│   ├── src/handler.js                   Lambda handler: validate, search, respond
-│   ├── src/loadListings.js              loads the bundled listings
-│   ├── src/search.js                    filter, sort, paginate
-│   ├── src/scoring.js                   budget and recency scores
 │   ├── template.yaml                    SAM template (run with sam:build / sam:start)
 │   └── test/
 ├── frontend/

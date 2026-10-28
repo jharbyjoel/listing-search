@@ -5,7 +5,7 @@ Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is th
 ## Roles
 
 - **Manager (orchestrating agent):** splits `PLAN.md` into small tasks, delegates each task to a sub agent, reviews every PR against this file, and reports to the user.
-- **Sub agents:** implement exactly one task each, on one area only (backend logic, Lambda handler, validation layer, frontend, or tests), and open one PR for it.
+- **Sub agents:** implement exactly one task each, on one area only (backend logic, Lambda handler, Lambda layers (validation, util), frontend, or tests), and open one PR for it.
 
 ## Rules
 
@@ -24,7 +24,7 @@ Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is th
 
 ### 3. Small, focused PRs
 - One task = one branch = one PR.
-- A PR touches one area (backend, validation layer, frontend, or tests for one of those). Tests for the code in a PR go in the same PR.
+- A PR touches one area (backend, Lambda layers (validation, util), frontend, or tests for one of those). Tests for the code in a PR go in the same PR.
 - Aim for a PR a human can review in about 10 minutes (roughly under 300 changed lines, excluding lockfiles and sample data).
 - Branch names: `<area>/<short-task-name>`, for example `backend/scoring`, `frontend/results-table`.
 
@@ -55,8 +55,9 @@ Read this file and `PLAN.md` before doing any work in this repo. `PLAN.md` is th
 
 ## Project facts
 
-- Backend: Node.js Lambda (`backend/`), run locally with `sam local start-api`. Data comes from `backend/data/sample_listings.json`. No database.
+- Backend: Node.js Lambda (`backend/`), run locally with `sam local start-api`. Data comes from `backend/layers/util/nodejs/data/sample_listings.json`. No database.
 - Validation (server): a Lambda layer at `backend/layers/validation/nodejs/validateQuery.js`, imported in the handler as `/opt/nodejs/validateQuery.js` (aliased to the local folder in `backend/vitest.config.js`).
+- Util (server): a Lambda layer at `backend/layers/util/nodejs/` (`loadListings.js`, `search.js`, `scoring.js`, `data/`), imported in the handler as `/opt/nodejs/loadListings.js` and `/opt/nodejs/search.js` (each aliased to its local file in `backend/vitest.config.js`).
 - Validation (UI): a separate copy at `frontend/src/utility/validateQuery.js`. There is no shared folder; the two copies must implement the same rules from `PLAN.md`.
 - Frontend: Vite + React, plain JavaScript (`frontend/`).
 - Tests: Vitest in both projects; React Testing Library in the frontend.
