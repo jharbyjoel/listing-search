@@ -26,7 +26,9 @@ As of 2026-10-27, v0.11.6.
 
 ## Known gaps / things to watch
 
-- The AWS SAM CLI is not installed on the dev machine, so `sam build` and `sam local start-api` have not been run since the restructure. Whether both layers load together at `/opt/nodejs` is unverified.
+- SAM CLI 1.170.0 is installed at `C:\Program Files\Amazon\AWSSAMCLI\bin\`. VS Code terminals only see it on PATH after VS Code has fully restarted.
+- With both layers loading at `/opt/nodejs`, `sam build` and `sam local start-api` now work. All 10 smoke requests in the verification run matched expectations.
+- Run SAM through the npm scripts (`npm run sam:build`, `npm run sam:start`), not bare `sam build`. With npm 9+ SAM cannot find the project-local esbuild unless node_modules/.bin is on PATH, which `npm run` provides.
 - Python is not installed on the dev machine. Use the Edit tool or Node for file edits, not Python scripts.
 - The squash commit for PR #20 has a "Claude Opus 5.5" co-author trailer, although Haiku did the work. It was left as is because fixing it would mean rewriting main history.
 
@@ -36,3 +38,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 
 - 2026-10-27, PR #22, sub agent (Haiku 5.5): Added this file and the ask-first, readability, CONTEXT.md and self-check rules to CLAUDE.md. No code, VERSION or README changes.
 - 2026-10-27, v0.11.6, manager (Opus 5.5): Reviewed PR #22 (sent back once for a missing Notes section and two inaccurate CONTEXT.md lines), merged it and released v0.11.6. From now on every PR must update CONTEXT.md, and every sub agent report must include the checklist self-check.
+- 2026-10-27, PR #<n>, sub agent (Haiku 5.5): `npm run sam:build` succeeded; 10 of 10 smoke requests matched expectations, no failures. Both layers load at `/opt/nodejs`.
