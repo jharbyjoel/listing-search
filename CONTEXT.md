@@ -6,7 +6,7 @@ This file is the shared memory for agents working in this repo. Read it before s
 
 ## Current state
 
-As of 2026-10-28, v0.13.1.
+As of 2026-10-29, v0.14.0.
 
 - All PLAN.md PRs #0–#13 are merged.
 - The backend layout is now:
@@ -60,3 +60,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 - 2026-10-28, PR #27, sub agent (Haiku 5.5): Added the user-approved scoring rationale comment at the top of scoring.js (formula + why). Comment only, no logic change.
 - 2026-10-28, v0.13.1, manager (Opus 5.5): Reviewed and merged PR #27 (comment only; the user approved the text; I confirmed the sample date range Jul 28 to Sep 4, 2026 against the data).
 - 2026-10-29, PR #28, sub agent (Haiku 5.5): Added the backend `minSqft` filter (`sqft >= n`, whole number ≥ 0, filter only, does not affect score) to the validation layer and `search.js`, with tests in validateQuery, search and handler. Handler unchanged. Frontend (UI field and Sq ft column) is the next PR; it still needs its own copy of the validation rule.
+- 2026-10-29, v0.14.0, manager (Opus 5.5): Reviewed and merged PR #28 (102/102 backend tests on my run). Next: the frontend minSqft PR (form field after Min bedrooms, UI validation copy, URL field, cache key, Sq ft column).
