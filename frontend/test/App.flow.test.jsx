@@ -21,6 +21,7 @@ function fakeListing(overrides) {
     price: 450000,
     bedrooms: 3,
     bathrooms: 2,
+    sqft: 1450,
     status: 'active',
     listedDate: '2026-08-15',
     score: 0.8,

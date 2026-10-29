@@ -101,10 +101,10 @@ Rules:
 
 ## Frontend
 
-- Single page: filter form (minPrice, maxPrice, minBedrooms, city, keyword, targetBudget, pageSize) + results table (address, city, price, beds, baths, status, listed date, score) + Prev/Next with "Page X of Y"
+- Single page: filter form (minPrice, maxPrice, minBedrooms, minSqft, city, keyword, targetBudget, pageSize) + results table (address, city, price, beds, baths, sq ft, status, listed date, score) + Prev/Next with "Page X of Y"
 - Filters + page **synced to the URL** query string (refresh/share keeps state)
 - Search fires on **Search button submit**; page changes come from the browser cache where possible (see below)
-  - On Search, one call to the existing API with `page=1&pageSize=max(20, pageSize)`. Its results and `totalResults` are stored in IndexedDB (`src/utility/listingsCache.js`, plain browser API, no wrapper library). Cache key = filter values only (minPrice, maxPrice, minBedrooms, city, keyword, targetBudget), not page or pageSize
+  - On Search, one call to the existing API with `page=1&pageSize=max(20, pageSize)`. Its results and `totalResults` are stored in IndexedDB (`src/utility/listingsCache.js`, plain browser API, no wrapper library). Cache key = filter values only (minPrice, maxPrice, minBedrooms, minSqft, city, keyword, targetBudget), not page or pageSize
   - A page whose rows all fall within the prefetched block (its first max(20, pageSize) results) is built from that block, with no API call. `totalPages` is computed from `totalResults` and the user's pageSize
   - An empty pageSize means 10 (the API default). Page/pageSize values that are not whole numbers in range (page ≥ 1, pageSize 1–50) skip the cache and go straight to the API, so the server's 400 is shown
   - This logic lives in `src/utility/loadListingsPage.js`
@@ -162,4 +162,5 @@ Each row is one task, one branch, one PR. PRs merge in order; later PRs build on
 | 16 | `frontend/listings-cache` | frontend | `src/utility/listingsCache.js` (plain IndexedDB, 5-min expiry) + tests with fake-indexeddb devDependency |
 | 17 | `frontend/prefetch-paging` | frontend | App: prefetch max(20, pageSize) on Search, local paging, API + cache for other pages, fallback when IndexedDB fails + tests |
 | 18 | `backend/min-sqft-filter` | backend | minSqft filter (sqft >= n, whole number ≥ 0) in the validation layer and search.js + tests |
+| 19 | `frontend/min-sqft-filter` | frontend | "Min sq ft" field after Min bedrooms, UI validation copy, URL field, cache key, Sq ft table column + tests |
 | — | (optional, later) | infra | AWS deploy — only if the user asks |

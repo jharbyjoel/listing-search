@@ -101,3 +101,19 @@ describe('buildPageKey', () => {
     expect(buildPageKey(filters, 10, 2)).not.toEqual(buildPageKey(filters, 10, 3))
   })
 })
+
+describe('minSqft in the cache keys', () => {
+  it('gives different first-results keys when only minSqft differs', () => {
+    const withoutMinSqft = { city: 'Austin' }
+    const withMinSqft = { city: 'Austin', minSqft: '1500' }
+
+    expect(buildFirstResultsKey(withMinSqft)).not.toEqual(buildFirstResultsKey(withoutMinSqft))
+  })
+
+  it('gives different page keys when only minSqft differs', () => {
+    const withoutMinSqft = { city: 'Austin' }
+    const withMinSqft = { city: 'Austin', minSqft: '1500' }
+
+    expect(buildPageKey(withMinSqft, 10, 2)).not.toEqual(buildPageKey(withoutMinSqft, 10, 2))
+  })
+})

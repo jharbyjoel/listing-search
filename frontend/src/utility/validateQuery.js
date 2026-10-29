@@ -2,8 +2,8 @@
 // This file is a copy of backend/layers/validation/nodejs/validateQuery.js.
 // Keep the two copies identical: both implement the rules in PLAN.md.
 
-const NUMERIC_FIELDS = ['minPrice', 'maxPrice', 'minBedrooms', 'targetBudget', 'page', 'pageSize']
-const WHOLE_NUMBER_FIELDS = ['minBedrooms', 'page', 'pageSize']
+const NUMERIC_FIELDS = ['minPrice', 'maxPrice', 'minBedrooms', 'minSqft', 'targetBudget', 'page', 'pageSize']
+const WHOLE_NUMBER_FIELDS = ['minBedrooms', 'minSqft', 'page', 'pageSize']
 const MAX_PAGE_SIZE = 50
 
 // Returns the trimmed string, or undefined when the value is missing or blank.
@@ -31,7 +31,7 @@ function numberError(field, number) {
 
 // Returns the error message for a number that is outside the allowed range, or null.
 function rangeError(field, number) {
-  if ((field === 'minPrice' || field === 'maxPrice' || field === 'minBedrooms') && number < 0) {
+  if ((field === 'minPrice' || field === 'maxPrice' || field === 'minBedrooms' || field === 'minSqft') && number < 0) {
     return `${field} cannot be negative`
   }
   if (field === 'targetBudget' && number <= 0) {

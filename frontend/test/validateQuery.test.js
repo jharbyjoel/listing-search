@@ -223,3 +223,47 @@ describe('validateQuery multiple errors', () => {
     ])
   })
 })
+
+describe('validateQuery minSqft', () => {
+  it('accepts a whole number', () => {
+    const result = validateQuery({ minSqft: '1500' })
+
+    expect(result.isValid).toBe(true)
+    expect(result.values.minSqft).toBe(1500)
+  })
+
+  it('treats an empty value as no filter', () => {
+    const result = validateQuery({ minSqft: '' })
+
+    expect(result.isValid).toBe(true)
+    expect(result.errors).toEqual([])
+    expect(result.values.minSqft).toBeUndefined()
+  })
+
+  it('reports a negative value as cannot be negative', () => {
+    const result = validateQuery({ minSqft: '-1' })
+
+    expect(result.errors).toEqual([{ field: 'minSqft', message: 'minSqft cannot be negative' }])
+  })
+
+  it('reports 1.5 as not a whole number', () => {
+    const result = validateQuery({ minSqft: '1.5' })
+
+    expect(result.errors).toEqual([{ field: 'minSqft', message: 'minSqft must be a whole number' }])
+  })
+
+  it('reports abc as not a number', () => {
+    const result = validateQuery({ minSqft: 'abc' })
+
+    expect(result.errors).toEqual([{ field: 'minSqft', message: 'minSqft must be a number' }])
+  })
+
+  it('returns the minSqft error together with another field error', () => {
+    const result = validateQuery({ minSqft: '1.5', page: '0' })
+
+    expect(result.errors).toEqual([
+      { field: 'minSqft', message: 'minSqft must be a whole number' },
+      { field: 'page', message: 'page must be 1 or greater' },
+    ])
+  })
+})

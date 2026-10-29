@@ -9,6 +9,7 @@ describe('readQueryFromUrl', () => {
       minPrice: '',
       maxPrice: '',
       minBedrooms: '',
+      minSqft: '',
       city: '',
       keyword: '',
       targetBudget: '',
@@ -46,5 +47,21 @@ describe('readQueryFromUrl and buildUrlSearch round trip', () => {
     const query = readQueryFromUrl(search)
 
     expect(buildUrlSearch(query)).toBe(search)
+  })
+})
+
+describe('minSqft in the URL', () => {
+  it('reads minSqft from the query string', () => {
+    expect(readQueryFromUrl('?minSqft=1500').minSqft).toBe('1500')
+  })
+
+  it('writes minSqft back to the query string', () => {
+    expect(buildUrlSearch({ minSqft: '1500', city: 'Reston' })).toBe('?minSqft=1500&city=Reston')
+  })
+
+  it('round-trips minSqft with the other filters', () => {
+    const search = '?minBedrooms=2&minSqft=1500&city=Reston&page=2'
+
+    expect(buildUrlSearch(readQueryFromUrl(search))).toBe(search)
   })
 })

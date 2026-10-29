@@ -1,6 +1,6 @@
 // Converts between the search form values and the URL query string.
 
-export const FILTER_FIELDS = ['minPrice', 'maxPrice', 'minBedrooms', 'city', 'keyword', 'targetBudget', 'pageSize']
+export const FILTER_FIELDS = ['minPrice', 'maxPrice', 'minBedrooms', 'minSqft', 'city', 'keyword', 'targetBudget', 'pageSize']
 
 // Reads the filter fields and page from a query string such as window.location.search.
 // Missing values come back as '' so the form can use them directly.

@@ -11,6 +11,7 @@ const results = [
     price: 425000,
     bedrooms: 3,
     bathrooms: 2,
+    sqft: 1450,
     status: 'active',
     listedDate: '2026-08-01',
     score: 0.876,
@@ -23,6 +24,7 @@ const results = [
     price: 1250000,
     bedrooms: 4,
     bathrooms: 3,
+    sqft: 2100,
     status: 'sold',
     listedDate: '2026-07-28',
     score: 0.5,
@@ -51,5 +53,20 @@ describe('ResultsTable', () => {
 
     expect(screen.getByRole('cell', { name: '88' })).toBeInTheDocument()
     expect(screen.getByRole('cell', { name: '50' })).toBeInTheDocument()
+  })
+})
+
+describe('ResultsTable Sq ft column', () => {
+  it('shows a Sq ft header', () => {
+    render(<ResultsTable results={results} />)
+
+    expect(screen.getByRole('columnheader', { name: 'Sq ft' })).toBeInTheDocument()
+  })
+
+  it('formats sqft with thousands separators and no unit', () => {
+    render(<ResultsTable results={results} />)
+
+    expect(screen.getByRole('cell', { name: '1,450' })).toBeInTheDocument()
+    expect(screen.getByRole('cell', { name: '2,100' })).toBeInTheDocument()
   })
 })
