@@ -28,7 +28,7 @@ As of 2026-10-28, v0.13.1.
 - Never amend commits or force-push. Fix a mistake with a normal follow-up commit, and ask before any history rewrite (user decision after PR #23).
 - Prefetch + cache (planned in PR #24): on Search, fetch `page=1&pageSize=20` and store it in IndexedDB. Pages whose rows are all within the first 20 are built locally; any other page calls the API with the user's pageSize and is cached. Cache expires after 5 minutes. Key for the first 20 is filters only. Plain IndexedDB, `fake-indexeddb` for tests only, no API change. If IndexedDB fails, fall back to API calls.
 - Prefetch size is max(20, pageSize); an empty pageSize means 10 (user decision, PR #26).
-- Min square feet filter: `minSqft`, whole number ≥ 0, `sqft >= n`, filter only (does not affect score); UI field after Min bedrooms plus a Sq ft table column (user decisions, PR #<n> backend).
+- Min square feet filter: `minSqft`, whole number ≥ 0, `sqft >= n`, filter only (does not affect score); UI field after Min bedrooms plus a Sq ft table column (user decisions, PR #28 backend).
 - Cache keys are tagged JSON arrays of the filter values in a fixed order, plus pageSize and page for page keys (user approved in PR #25).
 - The out-of-range paging guard in loadListingsPage is kept, and PR #26's size (~390 lines, mostly tests) was accepted (user decisions).
 
@@ -59,4 +59,4 @@ Newest entry at the bottom. Format: `- YYYY-MM-DD, <PR #/release>, <agent>: <wha
 - 2026-10-28, v0.13.0, manager (Opus 5.5): Reviewed and merged PR #26 (82/82 frontend tests and lint passing on my run). The first sub agent stalled during the docs follow-up and left uncommitted edits on main; I moved them onto the PR branch with a stash, and a fresh sub agent finished and pushed them. The user resolved the paging-guard question (kept). Prefetch + IndexedDB paging (PLAN rows 15-17) is complete.
 - 2026-10-28, PR #27, sub agent (Haiku 5.5): Added the user-approved scoring rationale comment at the top of scoring.js (formula + why). Comment only, no logic change.
 - 2026-10-28, v0.13.1, manager (Opus 5.5): Reviewed and merged PR #27 (comment only; the user approved the text; I confirmed the sample date range Jul 28 to Sep 4, 2026 against the data).
-- 2026-10-29, PR #<n>, sub agent (Haiku 5.5): Added the backend `minSqft` filter (`sqft >= n`, whole number ≥ 0, filter only, does not affect score) to the validation layer and `search.js`, with tests in validateQuery, search and handler. Handler unchanged. Frontend (UI field and Sq ft column) is the next PR; it still needs its own copy of the validation rule.
+- 2026-10-29, PR #28, sub agent (Haiku 5.5): Added the backend `minSqft` filter (`sqft >= n`, whole number ≥ 0, filter only, does not affect score) to the validation layer and `search.js`, with tests in validateQuery, search and handler. Handler unchanged. Frontend (UI field and Sq ft column) is the next PR; it still needs its own copy of the validation rule.
