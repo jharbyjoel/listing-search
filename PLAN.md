@@ -50,6 +50,7 @@ listing-search/
 ### Filters
 - `minPrice`, `maxPrice` — inclusive bounds on `price`
 - `minBedrooms` — `bedrooms >= n`
+- `minSqft` — `sqft >= n`
 - `city` — trimmed, case-insensitive exact match
 - `keyword` — trimmed, case-insensitive substring of `description`
 - All statuses (active / pending / sold) are returned; status is displayed in the UI
@@ -75,7 +76,7 @@ Cross-feed duplicates (A1/B7, A2/B8, A3/B9, A5/B11) are **shown as separate list
 ## API
 
 ```
-GET /listings?minPrice=&maxPrice=&minBedrooms=&city=&keyword=&targetBudget=&page=1&pageSize=10
+GET /listings?minPrice=&maxPrice=&minBedrooms=&minSqft=&city=&keyword=&targetBudget=&page=1&pageSize=10
 
 200 → { results: [{ ...listing, score }], page, pageSize, totalResults, totalPages }
 400 → { error: "VALIDATION_ERROR", details: [{ field, message }] }
@@ -90,7 +91,7 @@ Server-side validation lives in a **Lambda layer** (`backend/layers/validation/n
 The frontend has its **own copy** of the same rules in `frontend/src/utility/validateQuery.js`. The two files are intentionally separate (no shared import). Both must implement the rules below identically, and each has its own tests.
 
 Rules:
-- Numeric params must parse as finite numbers, no negatives; `minBedrooms`, `page`, `pageSize` integers
+- Numeric params must parse as finite numbers, no negatives; `minBedrooms`, `minSqft`, `page`, `pageSize` integers
 - `targetBudget` > 0 if given
 - `minPrice > maxPrice` → 400
 - `page` ≥ 1; `pageSize` 1–50 (≤ 0 or > 50 → 400, no silent clamp)
@@ -160,4 +161,5 @@ Each row is one task, one branch, one PR. PRs merge in order; later PRs build on
 | 15 | `docs/prefetch-cache-plan` | docs | Add prefetch + IndexedDB cache behavior to PLAN.md |
 | 16 | `frontend/listings-cache` | frontend | `src/utility/listingsCache.js` (plain IndexedDB, 5-min expiry) + tests with fake-indexeddb devDependency |
 | 17 | `frontend/prefetch-paging` | frontend | App: prefetch max(20, pageSize) on Search, local paging, API + cache for other pages, fallback when IndexedDB fails + tests |
+| 18 | `backend/min-sqft-filter` | backend | minSqft filter (sqft >= n, whole number ≥ 0) in the validation layer and search.js + tests |
 | — | (optional, later) | infra | AWS deploy — only if the user asks |

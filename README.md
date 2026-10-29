@@ -49,6 +49,7 @@ Each project has its own tests, run with `npm test`:
 | `minPrice` | number | none | 0 or more |
 | `maxPrice` | number | none | 0 or more; must not be less than `minPrice` |
 | `minBedrooms` | whole number | none | 0 or more |
+| `minSqft` | whole number | none | 0 or more |
 | `city` | text | none | Must match a city in the data (case-insensitive) |
 | `keyword` | text | none | Substring of the description (case-insensitive) |
 | `targetBudget` | number | none | Greater than 0. When set, results are scored against it |
@@ -71,8 +72,8 @@ Responses:
 
 The rules are the same in the backend and the frontend:
 
-- Numeric fields must be numbers. `minBedrooms`, `page` and `pageSize` must be whole numbers.
-- Prices and `minBedrooms` cannot be negative. `targetBudget` must be greater than 0.
+- Numeric fields must be numbers. `minBedrooms`, `minSqft`, `page` and `pageSize` must be whole numbers.
+- Prices, `minBedrooms` and `minSqft` cannot be negative. `targetBudget` must be greater than 0.
 - `page` must be at least 1. `pageSize` must be from 1 to 50. There is no silent clamping; out-of-range values return 400.
 - `minPrice` must not be greater than `maxPrice`.
 - An unknown `city` (no listing in the data) returns 400.
