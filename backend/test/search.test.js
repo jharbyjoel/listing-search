@@ -219,3 +219,42 @@ describe('searchListings', () => {
     }
   });
 });
+
+describe('searchListings minSqft', () => {
+  const NOW = new Date('2026-10-27T00:00:00Z');
+
+  function searchValues(overrides) {
+    return { page: 1, pageSize: 50, ...overrides };
+  }
+
+  it('keeps only listings with sqft at or above minSqft', () => {
+    const result = searchListings(loadListings(), searchValues({ minSqft: 1500 }), NOW);
+    expect(idsOf(result.results).sort()).toEqual(['A4', 'A6', 'A7', 'B10']);
+  });
+
+  it('includes a listing whose sqft equals minSqft', () => {
+    const result = searchListings(loadListings(), searchValues({ minSqft: 1300 }), NOW);
+    const ids = idsOf(result.results);
+    expect(ids).toContain('A5');
+    expect(ids).toContain('B11');
+  });
+
+  it('combines minSqft with another filter', () => {
+    const result = searchListings(loadListings(), searchValues({ minBedrooms: 4, minSqft: 2000 }), NOW);
+    expect(idsOf(result.results)).toEqual(['A4']);
+  });
+
+  it('returns no results when minSqft is larger than every listing', () => {
+    const result = searchListings(loadListings(), searchValues({ minSqft: 999999 }), NOW);
+    expect(result).toMatchObject({ results: [], totalResults: 0, totalPages: 0 });
+  });
+
+  it('does not change the score of listings', () => {
+    const withoutFilter = searchListings(loadListings(), searchValues({ targetBudget: 450000 }), NOW);
+    const withFilter = searchListings(loadListings(), searchValues({ targetBudget: 450000, minSqft: 1500 }), NOW);
+    const scoreById = new Map(withoutFilter.results.map((listing) => [listing.id, listing.score]));
+    for (const listing of withFilter.results) {
+      expect(listing.score).toBe(scoreById.get(listing.id));
+    }
+  });
+});

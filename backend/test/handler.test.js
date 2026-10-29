@@ -84,6 +84,16 @@ describe('handler', () => {
     ]);
   });
 
+  it('returns 400 with a minSqft detail when minSqft is negative', async () => {
+    const { response, body } = await callHandler({ minSqft: '-1' });
+
+    expect(response.statusCode).toBe(400);
+    expect(body).toEqual({
+      error: 'VALIDATION_ERROR',
+      details: [{ field: 'minSqft', message: 'minSqft cannot be negative' }],
+    });
+  });
+
   it('returns 400 when pageSize is 0', async () => {
     const { response, body } = await callHandler({ pageSize: '0' });
 

@@ -187,3 +187,43 @@ describe('validateQuery collects all errors', () => {
     ]);
   });
 });
+
+describe('validateQuery minSqft', () => {
+  it('accepts a whole number and converts it to a number', () => {
+    const result = validateQuery({ minSqft: '1500' });
+    expect(result.isValid).toBe(true);
+    expect(result.values.minSqft).toBe(1500);
+  });
+
+  it('gives no value when minSqft is empty or missing', () => {
+    expect(validateQuery({ minSqft: '' }).values.minSqft).toBeUndefined();
+    expect(validateQuery({}).values.minSqft).toBeUndefined();
+  });
+
+  it('reports a negative minSqft', () => {
+    const result = validateQuery({ minSqft: '-1' });
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toEqual([{ field: 'minSqft', message: 'minSqft cannot be negative' }]);
+  });
+
+  it('reports a minSqft that is not a whole number', () => {
+    const result = validateQuery({ minSqft: '1.5' });
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toEqual([{ field: 'minSqft', message: 'minSqft must be a whole number' }]);
+  });
+
+  it('reports a minSqft that is not a number', () => {
+    const result = validateQuery({ minSqft: 'abc' });
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toEqual([{ field: 'minSqft', message: 'minSqft must be a number' }]);
+  });
+
+  it('returns the minSqft error together with another field error', () => {
+    const result = validateQuery({ minSqft: 'abc', pageSize: '0' });
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toEqual([
+      { field: 'minSqft', message: 'minSqft must be a number' },
+      { field: 'pageSize', message: 'pageSize must be between 1 and 50' },
+    ]);
+  });
+});

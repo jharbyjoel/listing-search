@@ -65,6 +65,12 @@ export function validateQuery(query) {
     rangeMessage: 'minBedrooms cannot be negative',
   });
 
+  const minSqft = checkNumber('minSqft', query.minSqft, errors, {
+    wholeNumber: true,
+    isInRange: (number) => number >= 0,
+    rangeMessage: 'minSqft cannot be negative',
+  });
+
   const targetBudget = checkNumber('targetBudget', query.targetBudget, errors, {
     wholeNumber: false,
     isInRange: (number) => number > 0,
@@ -95,6 +101,7 @@ export function validateQuery(query) {
       minPrice,
       maxPrice,
       minBedrooms,
+      minSqft,
       targetBudget,
       city: cleanString(query.city),
       keyword: cleanString(query.keyword),

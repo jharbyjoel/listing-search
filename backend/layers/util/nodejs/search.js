@@ -15,6 +15,10 @@ function matchesMinBedrooms(listing, minBedrooms) {
   return listing.bedrooms >= minBedrooms;
 }
 
+function matchesMinSqft(listing, minSqft) {
+  return listing.sqft >= minSqft;
+}
+
 function matchesCity(listing, city) {
   return listing.city.toLowerCase() === city.toLowerCase();
 }
@@ -31,6 +35,9 @@ function listingPassesFilters(listing, values) {
     return false;
   }
   if (values.minBedrooms !== undefined && !matchesMinBedrooms(listing, values.minBedrooms)) {
+    return false;
+  }
+  if (values.minSqft !== undefined && !matchesMinSqft(listing, values.minSqft)) {
     return false;
   }
   if (values.city !== undefined && !matchesCity(listing, values.city)) {
