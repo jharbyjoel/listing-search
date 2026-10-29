@@ -6,13 +6,14 @@ const FIELD_LABELS = {
   minPrice: 'Min price',
   maxPrice: 'Max price',
   minBedrooms: 'Min bedrooms',
+  minSqft: 'Min sq ft',
   city: 'City',
   keyword: 'Keyword',
   targetBudget: 'Target budget',
   pageSize: 'Page size',
 }
 
-const NUMERIC_FIELDS = ['minPrice', 'maxPrice', 'minBedrooms', 'targetBudget', 'pageSize']
+const NUMERIC_FIELDS = ['minPrice', 'maxPrice', 'minBedrooms', 'minSqft', 'targetBudget', 'pageSize']
 
 // Copies the initial values into a complete object with every filter field set.
 function formValuesFrom(initialValues) {

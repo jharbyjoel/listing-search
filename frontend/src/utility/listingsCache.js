@@ -13,6 +13,7 @@ const FILTER_NAMES_IN_KEY_ORDER = [
   'minPrice',
   'maxPrice',
   'minBedrooms',
+  'minSqft',
   'city',
   'keyword',
   'targetBudget',

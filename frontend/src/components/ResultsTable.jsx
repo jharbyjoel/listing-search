@@ -9,6 +9,7 @@ function ResultsTable({ results }) {
           <th scope="col">Price</th>
           <th scope="col">Beds</th>
           <th scope="col">Baths</th>
+          <th scope="col">Sq ft</th>
           <th scope="col">Status</th>
           <th scope="col">Listed</th>
           <th scope="col">Score</th>
@@ -23,6 +24,7 @@ function ResultsTable({ results }) {
             <td>{'$' + listing.price.toLocaleString('en-US')}</td>
             <td>{listing.bedrooms}</td>
             <td>{listing.bathrooms}</td>
+            <td>{listing.sqft.toLocaleString('en-US')}</td>
             <td>{listing.status}</td>
             <td>{listing.listedDate}</td>
             <td>{Math.round(listing.score * 100)}</td>
